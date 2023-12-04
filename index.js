@@ -1,33 +1,13 @@
 require("dotenv").config();
 const express = require("express");
-const fileUpload = require("express-fileupload");
-const { auth } = require('express-openid-connect');
-const router = require("./router/router");
+
+const authRoutes = require("./routes/auth");
 
 const sequelize = require("./util/database");
 
 const app = express();
 
-const config = {
-  authRequired: false,
-  auth0Logout: true,
-  secret: 'a long, randomly-generated string stored in env',
-  baseURL: 'http://localhost:3000',
-  clientID: 'Ow5urIc8zpe3eGoaBgv51eCM8OBSkUov',
-  issuerBaseURL: 'https://dev-8uv0c3p610gnk0ri.us.auth0.com'
-};
-
-app.use(auth(config));
-
-app.use(function (req, res, next) {
-  res.locals.user = req.oidc.user;
-  next();
-});
-
-app.use(function (req, res, next) {
-  res.locals.user = req.oidc.user;
-  next();
-});
+app.use(express.json({ limit: "10mb" }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -39,7 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/", router);
+app.use("/auth", authRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
