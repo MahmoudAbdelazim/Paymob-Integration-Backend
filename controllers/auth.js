@@ -35,8 +35,6 @@ exports.login = async (req, res, next) => {
     const usernameOrPhoneNumber = req.body?.usernameOrPhoneNumber;
     const password = req.body?.password;
 
-    console.log("heerereeee");
-    console.log(req.body);
     const response = await authServices.loginService(
       usernameOrPhoneNumber,
       password
@@ -87,7 +85,6 @@ exports.submitOTP = async (req, res, next) => {
 
 exports.getUserBasicInfo = async (req, res, next) => {
   try {
-    console.log("HEEEREEEEEE");
     const user = await authServices.getUserBasicInfoService(req.user);
     res.status(200).json({ ...user });
   } catch (err) {

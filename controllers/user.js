@@ -3,8 +3,6 @@ const userServices = require("../services/user");
 exports.getAllUsers = async (req, res, next) => {
   try {
     const user = req.user;
-    console.log("HEEEEERREEEEEE");
-    console.log(user);
     if (user.role != "ADMIN") {
       res.status(301).json({ message: "Unauthorizedd" });
       return;

@@ -61,11 +61,9 @@ const sendOTPMessage = async (otp, phoneNumber) => {
     from: process.env.TWILIO_PHONE_NUMBER,
     to: phoneNumber,
   });
-  console.log(message.sid);
 };
 
 exports.loginService = async (usernameOrPhoneNumber, password) => {
-  console.log(usernameOrPhoneNumber);
   let user = await database.getUserByUsername(usernameOrPhoneNumber);
   if (!user) {
     user = await database.getUserByPhoneNumber(usernameOrPhoneNumber);
@@ -78,9 +76,10 @@ exports.loginService = async (usernameOrPhoneNumber, password) => {
       return { status: 401, message: "incorrect password" };
     } else {
       const otp = generateOTP();
-      await sendOTPMessage(otp, user.phoneNumber);
+      if (process.env.ENABLE_OTP == "YES") {
+        await sendOTPMessage(otp, user.phoneNumber);
+      }
       user.verificationCode = otp;
-      console.log("here");
       await user.save();
       return {
         status: 200,
