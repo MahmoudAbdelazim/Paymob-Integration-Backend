@@ -96,7 +96,7 @@ exports.submitOTPService = async (username, otp) => {
   if (!user) {
     return { status: 404, message: "user not found" };
   } else {
-    if (otp == user.verificationCode) {
+    if (otp == user.verificationCode || process.env.ENABLE_OTP != "YES") {
       const token = jwt.sign(
         {
           id: user.id,
