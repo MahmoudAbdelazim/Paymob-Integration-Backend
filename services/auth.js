@@ -24,7 +24,11 @@ exports.signupService = async (
   }
   let presentUser = await database.getUserByUsername(username);
   if (presentUser) {
-    return { status: 400, message: "username already taken" };
+    return { status: 400, message: "username already registered" };
+  }
+  presentUser = await database.getUserByPhoneNumber(phoneNumber);
+  if (presentUser) {
+    return { status: 400, message: "phone number already registered" };
   }
   const hashedPw = await bcrypt.hash(password, 12);
   const user = await database.createUser({
@@ -35,11 +39,33 @@ exports.signupService = async (
     lastName: lastName,
     role: "USER",
   });
-  console.log(user);
   return { status: 200 };
 };
 
+function generateOTP() {
+  var digits = "0123456789";
+  let OTP = "";
+  for (let i = 0; i < 4; i++) {
+    OTP += digits[Math.floor(Math.random() * 10)];
+  }
+  return OTP;
+}
+
+const sendOTPMessage = async (otp, phoneNumber) => {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const client = require("twilio")(accountSid, authToken);
+
+  const message = await client.messages.create({
+    body: `You OTP verification code is: ${otp}`,
+    from: process.env.TWILIO_PHONE_NUMBER,
+    to: phoneNumber,
+  });
+  console.log(message.sid);
+};
+
 exports.loginService = async (usernameOrPhoneNumber, password) => {
+  console.log(usernameOrPhoneNumber);
   let user = await database.getUserByUsername(usernameOrPhoneNumber);
   if (!user) {
     user = await database.getUserByPhoneNumber(usernameOrPhoneNumber);
@@ -51,6 +77,26 @@ exports.loginService = async (usernameOrPhoneNumber, password) => {
     if (!isEqual) {
       return { status: 401, message: "incorrect password" };
     } else {
+      const otp = generateOTP();
+      await sendOTPMessage(otp, user.phoneNumber);
+      user.verificationCode = otp;
+      console.log("here");
+      await user.save();
+      return {
+        status: 200,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+      };
+    }
+  }
+};
+
+exports.submitOTPService = async (username, otp) => {
+  let user = await database.getUserByUsername(username);
+  if (!user) {
+    return { status: 404, message: "user not found" };
+  } else {
+    if (otp == user.verificationCode) {
       const token = jwt.sign(
         {
           id: user.id,
@@ -68,8 +114,11 @@ exports.loginService = async (usernameOrPhoneNumber, password) => {
         phoneNumber: user.phoneNumber,
         firstName: user.firstName,
         lastName: user.lastName,
+        role: user.role,
       };
       return { status: 200, user: response };
+    } else {
+      return { status: 400, message: "Incorrect OTP" };
     }
   }
 };

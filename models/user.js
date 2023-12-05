@@ -35,6 +35,10 @@ const User = sequelize.define("user", {
     type: Sequelize.ENUM(["USER", "ADMIN"]),
     allowNull: false,
   },
+  verificationCode: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  }
 });
 
 module.exports = User;

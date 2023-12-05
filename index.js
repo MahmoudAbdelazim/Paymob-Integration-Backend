@@ -1,9 +1,10 @@
 require("dotenv").config();
 const express = require("express");
-
+const bcrypt = require("bcryptjs");
+const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const transactionRoutes = require("./routes/transaction");
-
+const userRoutes = require("./routes/user");
 const sequelize = require("./util/database");
 
 const app = express();
@@ -22,9 +23,10 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/transaction", transactionRoutes);
+app.use("/user", userRoutes);
 
 app.use((error, req, res, next) => {
-  console.log(error);
+  console.error(error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
@@ -35,11 +37,21 @@ const port = process.env.PORT || 3005;
 sequelize
   .sync({ force: true })
   // .sync()
-  .then((result) => {
+  .then(async (result) => {
+    // Creating a default admin user
+    const hashedPw = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
+    User.create({
+      username: process.env.ADMIN_USERNAME,
+      password: hashedPw,
+      phoneNumber: process.env.ADMIN_PHONE_NUMBER,
+      role: "ADMIN",
+      firstName: process.env.ADMIN_FIRST_NAME,
+      lastName: process.env.ADMIN_LAST_NAME,
+    });
     app.listen(port);
   })
   .catch((err) => {
-    console.log(err);
+    console.error(err);
   });
 
 module.exports = app;

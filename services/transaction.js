@@ -118,7 +118,6 @@ const requestPaymentKey = async (
       "https://accept.paymob.com/api/acceptance/payment_keys",
       requestOptions
     );
-    console.log(response.status);
     if (response.status == 201) {
       const result = await response.json();
       return { token: result.token };
@@ -160,3 +159,9 @@ exports.getTransactionsService = async(user) => {
   const transactions = await database.getTransactionsOfUser(user.username);
   return {status: 200, transactions: transactions};
 }
+
+exports.getTransactionsOfUserService = async(username) => {
+  const transactions = await database.getTransactionsOfUser(username);
+  return {status: 200, transactions: transactions};
+}
+

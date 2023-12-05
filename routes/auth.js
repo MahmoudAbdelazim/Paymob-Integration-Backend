@@ -10,6 +10,8 @@ router.post("/signup", authController.signup);
 
 router.post("/login", authController.login);
 
+router.post("/submit-otp", authController.submitOTP);
+
 router.get("/getUserBasicInfo", authenticate, authController.getUserBasicInfo);
 
 module.exports = router;

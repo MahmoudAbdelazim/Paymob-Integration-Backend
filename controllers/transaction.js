@@ -48,3 +48,29 @@ exports.getMyTransactions = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getTransactionsOfUser = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const username = req.params.username;
+    if (user.role != "ADMIN") {
+      res.status(301).json({ message: "Unauthorized" });
+      return;
+    }
+    const response = await transactionServices.getTransactionsOfUserService(username);
+    if (response.status == 200) {
+      res.status(200).json({
+        transactions: response.transactions,
+      });
+    } else {
+      const error = new Error(response?.message);
+      error.statusCode = response.status;
+      throw error;
+    }
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};

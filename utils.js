@@ -10,7 +10,6 @@ exports.reduce = async (base64String) => {
   reducedBuffer = await sharp(reducedBuffer)
     .resize({ width: 1024 })
     .toBuffer();
-  console.log("heere " + reducedBuffer.length);
   // Convert the reduced buffer back to a Base64 string
   const reducedBase64String = reducedBuffer.toString("base64");
 
