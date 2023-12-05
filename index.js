@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 
 const authRoutes = require("./routes/auth");
+const transactionRoutes = require("./routes/transaction");
 
 const sequelize = require("./util/database");
 
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/transaction", transactionRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);

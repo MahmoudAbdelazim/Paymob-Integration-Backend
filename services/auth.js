@@ -42,7 +42,7 @@ exports.signupService = async (
 exports.loginService = async (usernameOrPhoneNumber, password) => {
   let user = await database.getUserByUsername(usernameOrPhoneNumber);
   if (!user) {
-    user = await database.getUserByPhoneNumber(phoneNumber);
+    user = await database.getUserByPhoneNumber(usernameOrPhoneNumber);
   }
   if (!user) {
     return { status: 404, message: "user not found" };
@@ -56,6 +56,9 @@ exports.loginService = async (usernameOrPhoneNumber, password) => {
           id: user.id,
           username: user.username,
           phoneNumber: user.phoneNumber,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
         },
         process.env.JWT_SECRET
       );
@@ -69,4 +72,14 @@ exports.loginService = async (usernameOrPhoneNumber, password) => {
       return { status: 200, user: response };
     }
   }
+};
+
+exports.getUserBasicInfoService = async (user) => {
+  return {
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phoneNumber: user.phoneNumber,
+    role: user.role,
+  };
 };
